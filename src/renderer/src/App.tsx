@@ -1,10 +1,14 @@
-import type { ReactElement } from 'react'
+import { useState, type ReactElement } from 'react'
 import { useProjectStore } from '@renderer/store/useProjectStore'
 import { compileFontBuffer } from '@renderer/lib/fontCompiler'
 import { GlyphEditor } from '@renderer/features/script-editor/GlyphEditor'
+import { PhonologyWorkbench } from '@renderer/features/phonology/PhonologyWorkbench'
+
+type WorkspaceTab = 'script' | 'phonology'
 
 export default function App(): ReactElement {
   const { project, isDirty, updateProjectName, saveProject, openProject } = useProjectStore()
+  const [activeTab, setActiveTab] = useState<WorkspaceTab>('script')
 
   const handleExportTtf = async (): Promise<void> => {
     const buffer = compileFontBuffer(project)
@@ -33,21 +37,54 @@ export default function App(): ReactElement {
           borderBottom: '1px solid #27272a'
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <input
-            value={project.meta.name}
-            onChange={(e) => updateProjectName(e.target.value)}
-            style={{
-              fontSize: 16,
-              fontWeight: 600,
-              background: 'transparent',
-              color: '#fff',
-              border: '1px solid transparent',
-              padding: '4px 8px',
-              borderRadius: 4
-            }}
-          />
-          {isDirty && <span style={{ fontSize: 12, color: '#a1a1aa' }}>• Unsaved</span>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <input
+              value={project.meta.name}
+              onChange={(e) => updateProjectName(e.target.value)}
+              style={{
+                fontSize: 16,
+                fontWeight: 600,
+                background: 'transparent',
+                color: '#fff',
+                border: '1px solid transparent',
+                padding: '4px 8px',
+                borderRadius: 4
+              }}
+            />
+            {isDirty && <span style={{ fontSize: 12, color: '#a1a1aa' }}>• Unsaved</span>}
+          </div>
+
+          <nav style={{ display: 'flex', gap: 6 }}>
+            <button
+              onClick={() => setActiveTab('script')}
+              style={{
+                padding: '6px 12px',
+                background: activeTab === 'script' ? '#27272a' : 'transparent',
+                color: activeTab === 'script' ? '#60a5fa' : '#a1a1aa',
+                border: '1px solid #27272a',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              Script & Font
+            </button>
+            <button
+              onClick={() => setActiveTab('phonology')}
+              style={{
+                padding: '6px 12px',
+                background: activeTab === 'phonology' ? '#27272a' : 'transparent',
+                color: activeTab === 'phonology' ? '#60a5fa' : '#a1a1aa',
+                border: '1px solid #27272a',
+                borderRadius: 4,
+                cursor: 'pointer',
+                fontWeight: 600
+              }}
+            >
+              Phonology & Sound Rules
+            </button>
+          </nav>
         </div>
 
         <div style={{ display: 'flex', gap: 8 }}>
@@ -76,7 +113,7 @@ export default function App(): ReactElement {
 
       {/* Active Workspace */}
       <main style={{ flex: 1, padding: 16, overflow: 'hidden' }}>
-        <GlyphEditor />
+        {activeTab === 'script' ? <GlyphEditor /> : <PhonologyWorkbench />}
       </main>
     </div>
   )
